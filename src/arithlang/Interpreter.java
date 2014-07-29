@@ -1,0 +1,65 @@
+package arithlang;
+
+import java.io.IOException;
+
+import org.antlr.v4.Tool;
+import org.antlr.v4.tool.ErrorType;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.LexerInterpreter;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.tool.Grammar;
+
+import arithlang.Exp.Const;
+import arithlang.Exp.Div;
+import arithlang.Exp.Minus;
+import arithlang.Exp.Mult;
+import arithlang.Exp.Plus;
+
+public class Interpreter {
+	public static void main(String[] args){
+		System.out.println("Type expression to evaluate and press the enter key, e.g. 3 * 100 + 84 / (279 - 277)");
+		System.out.println("Press Ctrl + C to exit.");
+		Evaluator eval = new Evaluator();
+		Printer printer = new Printer();
+		Reader reader = new Reader();
+		try {
+			while(true) { // Read-Eval-Print-Loop (also known as REPL)
+				ParseTree ast = reader.read();
+				Exp e = new Plus( 
+						new Mult( new Const (3), new Const (100)),
+						new Div( new Const(84), 
+								new Minus( new Const(279), new Const(277))));
+				Value val = eval.valueOf(e);
+				printer.print(val);
+			}
+		} catch (IOException e) {
+			System.out.println("Error reading input.");
+		}
+	}
+	private static void testParserGen(){
+		System.out.println("Working Directory = " +
+	              System.getProperty("user.dir"));
+		//Tool parser = new Tool(new String[]{"./build/arithlang/Lang.g4"});
+		Tool parser = new Tool(new String[]{"-long-messages"});
+		try {
+			Grammar g = parser.loadGrammar("./build/arithlang/Lang.g4");
+			
+			ANTLRInputStream stream = new ANTLRInputStream("Hello hridesh");
+			LexerInterpreter l = g.createLexerInterpreter(stream);
+			
+			//System.out.println(l.);
+            //parser.processGrammarsOnCommandLine();
+        }
+        finally {
+            if ( parser.log ) {
+                try {
+                    String logname = parser.logMgr.save();
+                    System.out.println("wrote "+logname);
+                }
+                catch (IOException ioe) {
+                    parser.errMgr.toolError(ErrorType.INTERNAL_ERROR, ioe);
+                }
+            }
+        }		
+	}
+}
