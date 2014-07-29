@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.LexerInterpreter;
 import org.antlr.v4.runtime.ParserInterpreter;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.tool.Grammar;
 import org.antlr.v4.tool.LexerGrammar;
@@ -24,21 +23,6 @@ public class Reader {
 		final CommonTokenStream tokens = new CommonTokenStream(lexEngine);
 		final ParserInterpreter parser = g.createParserInterpreter(tokens);
 
-		//Temp.
-		parser.addParseListener(new ParseTreeListener() {
-			public void visitTerminal(TerminalNode node) { 
-				
-			}
-			public void visitErrorNode(ErrorNode node) { 
-				
-			}
-			public void enterEveryRule(ParserRuleContext ctx) { 
-		    	System.out.println("Listener - start" + ctx.getRuleIndex());
-		    }
-			public void exitEveryRule(ParserRuleContext ctx) { 
-		    	System.out.println("Listener - exit" + ctx.getRuleIndex());
-		    }
-		});
 		final ParseTree t = parser.parse(g.rules.get(startRule).index);
 		System.out.println("parse tree: "+t.toStringTree(parser));
 		
@@ -48,24 +32,37 @@ public class Reader {
 				return new arithlang.Value.Unit();
 			}
 			public Value visitChildren(RuleNode node) { 
-				System.out.println("Rule node: ");
-				System.out.println("visitChildren: " + node.toStringTree(parser));
 				int childCount = node.getChildCount();
-				System.out.println("Num children: " + childCount);
+				System.out.println("visitChildren(RuleNode node), node = " + node.toStringTree(parser) + ", #children = " + childCount);
 				for(int i = 0; i < childCount; i++) {
 					node.getChild(i).accept(this);
 				}
 				return new arithlang.Value.Unit();
 			}
-			public Value visitTerminal(TerminalNode node) { 
-				System.out.println("visitTerminal: " + node.toStringTree(parser));
-				
+			public Value visitTerminal(TerminalNode node) {
+				String s = node.toStringTree();
+				if(filterTokens(s)) 
+					return arithlang.Value.Unit.v;
+
+				try {
+					return new arithlang.Value.Int(Integer.parseInt(s));
+				} catch (NumberFormatException e){}					
+				// Error case - generally means a new Token is added in the grammar and not handled in
+				//              the filterTokens method above, or a new value type is added. 
+				System.out.println("visitTerminal: Illegal terminal " + s);
 				return new arithlang.Value.Unit();
 			}
-			public Value visitErrorNode(ErrorNode node) { 
+			public Value visitErrorNode(ErrorNode node) {
 				System.out.println("visitErrorNode: " + node.toStringTree(parser));
 				
 				return new arithlang.Value.Unit();
+			}
+			private boolean filterTokens(String s) {
+				if(s.equals("(") || s.equals(")") 
+						|| s.equals("+") || s.equals("-") || s.equals("*") 
+						|| s.equals("/"))
+					return true;
+				return false;
 			}
 		});
 		return t;
@@ -75,9 +72,10 @@ public class Reader {
 	private static LexerGrammar createLexicalGrammar(){
 		LexerGrammar lg = null;
 		try{
-			lg = new LexerGrammar(readFile("build/arithlang/LexSpec.g"));
+			lg = new LexerGrammar(readFile("build/arithlang/LangSpec.g"));
 		} catch (RecognitionException e) {
 			System.out.println("Error in Lexical Specification\n" + e);
+			System.exit(-1); //These are fatal errors
 		}		
 		return lg;
 	}
@@ -90,6 +88,7 @@ public class Reader {
 			g = new Grammar(readFile("build/arithlang/LangSpec.g"), Reader.lg);
 		} catch (RecognitionException e) {
 			System.out.println("Error in Grammar Specification\n" + e);
+			System.exit(-1); //These are fatal errors
 		}
 		return g;
 	}
@@ -109,6 +108,7 @@ public class Reader {
 			}
 		} catch (IOException e) {
 			System.out.println("Could not open file " + fileName);
+			System.exit(-1); //These are fatal errors
 		}
 		return "";
 	}
