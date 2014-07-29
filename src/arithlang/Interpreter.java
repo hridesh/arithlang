@@ -16,52 +16,42 @@ import arithlang.Exp.MultExp;
 import arithlang.Exp.AddExp;
 
 public class Interpreter {
-	public static void main(String[] args){
-		System.out.println("Type expression to evaluate and press the enter key, e.g. 3 * 100 + 84 / (279 - 277)");
-		System.out.println("Press Ctrl + C to exit.");
-		Evaluator eval = new Evaluator();
-		Printer printer = new Printer();
-		Reader reader = new Reader();
-		testParserGen();
+    public static void main(String[] args) {
+	System.out.println("Type expression to evaluate and press the enter key, e.g. 3 * 100 + 84 / (279 - 277)");
+	System.out.println("Press Ctrl + C to exit.");
+	Evaluator eval = new Evaluator();
+	Printer printer = new Printer();
+	Reader reader = new Reader();
+	testParserGen();
+	try {
+	    while (true) { // Read-Eval-Print-Loop (also known as REPL)
+		ParseTree ast = reader.read();
+		Exp e = new AddExp(new MultExp(new Const(3), new Const(100)),
+			new DivExp(new Const(84), new SubExp(new Const(279),
+				new Const(277))));
+		Value val = eval.valueOf(e);
+		printer.print(val);
+	    }
+	} catch (IOException e) {
+	    System.out.println("Error reading input.");
+	}
+    }
+
+    private static void testParserGen() {
+	System.out.println("Working Directory = "
+		+ System.getProperty("user.dir"));
+	Tool parser = new Tool(new String[] { "./build/arithlang/ArithLang.g" });
+	try {
+	    parser.processGrammarsOnCommandLine();
+	} finally {
+	    if (parser.log) {
 		try {
-			while(true) { // Read-Eval-Print-Loop (also known as REPL)
-				ParseTree ast = reader.read();
-				Exp e = new AddExp( 
-						new MultExp( new Const (3), new Const (100)),
-						new DivExp( new Const(84), 
-								new SubExp( new Const(279), new Const(277))));
-				Value val = eval.valueOf(e);
-				printer.print(val);
-			}
-		} catch (IOException e) {
-			System.out.println("Error reading input.");
+		    String logname = parser.logMgr.save();
+		    System.out.println("wrote " + logname);
+		} catch (IOException ioe) {
+		    parser.errMgr.toolError(ErrorType.INTERNAL_ERROR, ioe);
 		}
+	    }
 	}
-	private static void testParserGen(){
-		System.out.println("Working Directory = " +
-	              System.getProperty("user.dir"));
-		Tool parser = new Tool(new String[]{"./build/arithlang/ArithLang.g"});
-		//Tool parser = new Tool(new String[]{"-long-messages"});
-		try {
-//			Grammar g = parser.loadGrammar("./build/arithlang/ArithLang.g");
-//			
-//			
-//			ANTLRInputStream stream = new ANTLRInputStream("Hello hridesh");
-//			LexerInterpreter l = g.createLexerInterpreter(stream);
-//			
-			//System.out.println(l.);
-            parser.processGrammarsOnCommandLine();
-        }
-        finally {
-            if ( parser.log ) {
-                try {
-                    String logname = parser.logMgr.save();
-                    System.out.println("wrote "+logname);
-                }
-                catch (IOException ioe) {
-                    parser.errMgr.toolError(ErrorType.INTERNAL_ERROR, ioe);
-                }
-            }
-        }		
-	}
+    }
 }
