@@ -14,7 +14,8 @@ public interface Value {
 	    public boolean v() { return _val; }
 	    public String tostring() { return "" + _val; }
 	}
-	static class Unit implements Value { 
+	static class Unit implements Value {
+		public static final Unit v = new Unit();
 	    public String tostring() { return "unit"; }
 	}
 	static class DynamicError implements Value { 
