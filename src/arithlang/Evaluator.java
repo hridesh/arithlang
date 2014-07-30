@@ -1,8 +1,12 @@
 package arithlang;
-import static arithlang.Exp.*;
+import static arithlang.AST.*;
 import static arithlang.Value.*;
 
 public class Evaluator {
+	Value valueOf(Program p) {
+		// Value of a program in this language is the value of the expression
+		return valueOf(p.e());
+	}
 	Value valueOf(Const exp) {
 		return new Int(exp.v());
 	}
