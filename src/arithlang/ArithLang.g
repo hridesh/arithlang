@@ -2,58 +2,52 @@ grammar ArithLang;
  
  // Grammar of this Programming Language
  //  - grammar rules start with lowercase
- program returns [ Program p ] : 
+ program : 
 		exp
- 		{ p = new Program($exp.e); } 
 		;
 
- exp returns [ Exp e ] : 
-		varexp { e = $varexp.e; }
-		| numexp { e = $numexp.e; }
-        | addexp { e = $addexp.e; }
-        | subexp { e = $subexp.e; }
-        | multexp { e = $multexp.e; }
-        | divexp { e = $divexp.e; }
+ exp : 
+		varexp 
+		| numexp 
+        | addexp 
+        | subexp 
+        | multexp 
+        | divexp 
         ;
  
- varexp returns [ Exp.VarExp e ] : 
+ varexp  : 
  		Identifier 
- 		{ e = new Exp.VarExp($Identifier.text); } 
  		;
  
- numexp returns [ Exp.ConstExp e ] :
+ numexp :
  		Number 
- 		{ e = new Exp.Const(Integer.parseInt(s)); } ;
+ 		;
   
- addexp returns [ Exp.AddExp e ]  
-		@init {e = new Exp.AddExp();} :
- 		'(' '+' 
- 		    fst=exp { e.add($fst.e); }
- 		    (rest=exp { e.add($rest.e); } )+ 
+ addexp :
+ 		'(' '+'
+ 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
  
- subexp returns [ Exp.SubExp e ]  
-		@init {e = new Exp.SubExp();} :
+ subexp :  
  		'(' '-' 
- 		    fst=exp { e.add($fst.e); }
- 		    (rest=exp { e.add($rest.e); } )+ 
+ 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 
- multexp returns [ Exp.MultExp e ] 
-		@init {e = new Exp.MultExp();} :
+ multexp : 
  		'(' '*' 
- 		    fst=exp { e.add($fst.e); }
- 		    (rest=exp { e.add($rest.e); } )+ 
+ 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
  
- divexp returns [ Exp.DivExp e ] 
-		@init {e = new Exp.DivExp();} :
+ divexp  : 
  		'(' '/' 
- 		    fst=exp { e.add($fst.e); }
- 		    (rest=exp { e.add($rest.e); } )+ 
+ 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 
