@@ -10,8 +10,10 @@ import java.util.List;
  * @author hridesh
  * 
  */
+@SuppressWarnings("rawtypes")
 public interface AST {
 	public static abstract class ASTNode implements AST {
+		public abstract Object accept(Visitor visitor);
 	}
 	public static class Program extends ASTNode {
 		Exp _e;
@@ -23,14 +25,16 @@ public interface AST {
 		public Exp e() {
 			return _e;
 		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
+		}
 	}
-	public static abstract class Exp implements AST {
+	public static abstract class Exp extends ASTNode {
 
 	}
-	public static abstract class ArithExp extends Exp {
-	}
 
-	static class VarExp extends Exp {
+	public static class VarExp extends Exp {
 		String _name;
 
 		public VarExp(String name) {
@@ -40,9 +44,13 @@ public interface AST {
 		public String name() {
 			return _name;
 		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
+		}
 	}
 
-	static class Const extends ArithExp {
+	public static class Const extends Exp {
 		int _val;
 
 		public Const(int v) {
@@ -52,57 +60,62 @@ public interface AST {
 		public int v() {
 			return _val;
 		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
+		}
 	}
 
-	static abstract class CompoundArithExp extends ArithExp {
-		List<ArithExp> _rest;
+	public static abstract class CompoundArithExp extends Exp {
+		List<Exp> _rest;
 
 		public CompoundArithExp() {
-			_rest = new ArrayList<ArithExp>();
+			_rest = new ArrayList<Exp>();
 		}
 
-		public CompoundArithExp(ArithExp fst) {
-			_rest = new ArrayList<ArithExp>();
+		public CompoundArithExp(Exp fst) {
+			_rest = new ArrayList<Exp>();
 			_rest.add(fst);
 		}
 
 		public CompoundArithExp(List<Exp> args) {
-			_rest = new ArrayList<ArithExp>();
+			_rest = new ArrayList<Exp>();
 			for (Exp e : args)
-				_rest.add((ArithExp) e);
+				_rest.add((Exp) e);
 		}
 
-		public CompoundArithExp(ArithExp fst, List<ArithExp> rest) {
-			_rest = new ArrayList<ArithExp>();
+		public CompoundArithExp(Exp fst, List<Exp> rest) {
+			_rest = new ArrayList<Exp>();
 			_rest.add(fst);
 			_rest.addAll(rest);
 		}
 
-		public CompoundArithExp(ArithExp fst, ArithExp second) {
-			_rest = new ArrayList<ArithExp>();
+		public CompoundArithExp(Exp fst, Exp second) {
+			_rest = new ArrayList<Exp>();
 			_rest.add(fst);
 			_rest.add(second);
 		}
 
-		public ArithExp fst() {
+		public Exp fst() {
 			return _rest.get(0);
 		}
 
-		public ArithExp snd() {
+		public Exp snd() {
 			return _rest.get(1);
 		}
 
-		public List<ArithExp> all() {
+		public List<Exp> all() {
 			return _rest;
 		}
 
-		public void add(ArithExp e) {
+		public void add(Exp e) {
 			_rest.add(e);
 		}
+		
 	}
 
-	static class AddExp extends CompoundArithExp {
-		public AddExp(ArithExp fst) {
+	public static class AddExp extends CompoundArithExp {
+		public AddExp(Exp fst) {
 			super(fst);
 		}
 
@@ -110,18 +123,22 @@ public interface AST {
 			super(args);
 		}
 
-		public AddExp(ArithExp fst, List<ArithExp> rest) {
+		public AddExp(Exp fst, List<Exp> rest) {
 			super(fst, rest);
 		}
 
-		public AddExp(ArithExp left, ArithExp right) {
+		public AddExp(Exp left, Exp right) {
 			super(left, right);
+		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 
-	static class SubExp extends CompoundArithExp {
+	public static class SubExp extends CompoundArithExp {
 
-		public SubExp(ArithExp fst) {
+		public SubExp(Exp fst) {
 			super(fst);
 		}
 
@@ -129,17 +146,21 @@ public interface AST {
 			super(args);
 		}
 
-		public SubExp(ArithExp fst, List<ArithExp> rest) {
+		public SubExp(Exp fst, List<Exp> rest) {
 			super(fst, rest);
 		}
 
-		public SubExp(ArithExp left, ArithExp right) {
+		public SubExp(Exp left, Exp right) {
 			super(left, right);
+		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 
-	static class DivExp extends CompoundArithExp {
-		public DivExp(ArithExp fst) {
+	public static class DivExp extends CompoundArithExp {
+		public DivExp(Exp fst) {
 			super(fst);
 		}
 
@@ -147,17 +168,21 @@ public interface AST {
 			super(args);
 		}
 
-		public DivExp(ArithExp fst, List<ArithExp> rest) {
+		public DivExp(Exp fst, List<Exp> rest) {
 			super(fst, rest);
 		}
 
-		public DivExp(ArithExp left, ArithExp right) {
+		public DivExp(Exp left, Exp right) {
 			super(left, right);
+		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 
-	static class MultExp extends CompoundArithExp {
-		public MultExp(ArithExp fst) {
+	public static class MultExp extends CompoundArithExp {
+		public MultExp(Exp fst) {
 			super(fst);
 		}
 
@@ -165,15 +190,34 @@ public interface AST {
 			super(args);
 		}
 
-		public MultExp(ArithExp fst, List<ArithExp> rest) {
+		public MultExp(Exp fst, List<Exp> rest) {
 			super(fst, rest);
 		}
 
-		public MultExp(ArithExp left, ArithExp right) {
+		public MultExp(Exp left, Exp right) {
 			super(left, right);
+		}
+		
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 	
-	static class Error extends Exp {
+	public static class ErrorExp extends Exp {
+		public Object accept(Visitor visitor) {
+			return visitor.visit(this);
+		}
 	}
+	
+	public interface Visitor <T> {
+		// This interface should contain a signature for each concrete AST node.
+		public T visit(AST.AddExp e);
+		public T visit(AST.Const e);
+		public T visit(AST.DivExp e);
+		public T visit(AST.ErrorExp e);
+		public T visit(AST.MultExp e);
+		public T visit(AST.Program p);
+		public T visit(AST.SubExp e);
+		public T visit(AST.VarExp e);
+	}	
 }
