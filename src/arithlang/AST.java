@@ -27,8 +27,6 @@ public interface AST {
 	public static abstract class Exp implements AST {
 
 	}
-	static class Error extends Exp {
-	}
 	public static abstract class ArithExp extends Exp {
 	}
 
@@ -174,5 +172,8 @@ public interface AST {
 		public MultExp(ArithExp left, ArithExp right) {
 			super(left, right);
 		}
+	}
+	
+	static class Error extends Exp {
 	}
 }
