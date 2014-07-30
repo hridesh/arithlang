@@ -23,33 +23,38 @@ public class Reader {
 	private static final boolean DEBUG = false;
 	
 	Program read() throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		System.out.print("$ ");
-		String program = br.readLine();
-		return parse(program);
+		String programText = readNextProgram();
+		Program program = parse(programText);
+		return program;
 	}
 	
-	Program parse(String program) {
-		final LexerInterpreter lexEngine = lg.createLexerInterpreter(new ANTLRInputStream(program));
+	private Program parse(String programText) {
+		final LexerInterpreter lexEngine = lg.createLexerInterpreter(
+				new ANTLRInputStream(programText));
 		final CommonTokenStream tokens = new CommonTokenStream(lexEngine);
 		final ParserInterpreter parser = g.createParserInterpreter(tokens);
 		final ParseTree t = parser.parse(g.rules.get(startRule).index);
-		if(DEBUG) System.out.println("parse tree: " + t.toStringTree(parser));
-
-		// We know that top-level node is a program, and for this language it
-		// contains a single expression, so we just convert the enclosing
-		// expression's parse tree to the AST used by this interpreter.
-		Exp exp = t.getChild(0).accept(new TreeToExpConverter(parser));
+		if(DEBUG) 
+			System.out.println("parse tree: " + t.toStringTree(parser));
+		Program program = convertParseTreeToAST(parser, t);
+		return program;
+	}
+	
+	private Program convertParseTreeToAST(ParserInterpreter parser, ParseTree parseTree) {
+		// We know that top-level parse tree node is a program, and for this 
+		// language it contains a single expression, so we just convert the 
+		// enclosing expression's parse tree to the AST used by this interpreter.
+		Exp exp = parseTree.getChild(0).accept(new TreeToExpConverter(parser));
 		return new Program(exp);
 	}
-
-	public static final LexerGrammar lg = createLexicalGrammar();
+	
+	private static final LexerGrammar lg = createLexicalGrammar();
 	private static LexerGrammar createLexicalGrammar() {
 		LexerGrammar lg = null;
 		try {
 			lg = new LexerGrammar(readFile("build/arithlang/ArithLang.g"));
 		} catch (RecognitionException e) {
-			System.out.println("Error in Lexical Specification\n" + e);
+			System.out.println("ErrorExp in Lexical Specification\n" + e);
 			System.exit(-1); // These are fatal errors
 		}
 		return lg;
@@ -57,11 +62,11 @@ public class Reader {
 
 
 	//Following are ANTLR constants - Change them if you change the Grammar.
-	public static final String startRule = "program";
-	public static final int program = 0, exp = 1, varexp = 2, numexp = 3,
+	private static final String startRule = "program";
+	private static final int program = 0, exp = 1, varexp = 2, numexp = 3,
 			addexp = 4, subexp = 5, multexp = 6, divexp = 7;
 
-	public static final Grammar g = createGrammar();
+	private static final Grammar g = createGrammar();
 	private static Grammar createGrammar() {
 		Grammar g = null;
 		try {
@@ -119,14 +124,15 @@ public class Reader {
 		public AST.Exp visitChildren(RuleNode node) {			
 			switch(node.getRuleContext().getRuleIndex()){
 				case exp: return visitChildrenHelper(node).get(0); 
-				case varexp: System.out.println(visitChildrenHelper(node)); break; 
+				case varexp: return new AST.VarExp(node.getChild(0).getText());
 				case numexp: return visitChildrenHelper(node).get(0);
 				case addexp: return new AST.AddExp(visitChildrenHelper(node)); 
 				case subexp: return new AST.SubExp(visitChildrenHelper(node)); 
 				case multexp: return new AST.MultExp(visitChildrenHelper(node));
 				case divexp: return new AST.DivExp(visitChildrenHelper(node));
+				case program: 
 				default: 
-					System.out.println("Conversion error (from parse tree to AST): found unknown/unhandled case " + node.getRuleContext().getRuleIndex());
+					System.out.println("Conversion error (from parse tree to AST): found unknown/unhandled case " + parser.getRuleNames()[node.getRuleContext().getRuleIndex()]);
 			}
 			return null;
 		}
@@ -145,12 +151,12 @@ public class Reader {
 			// and not handled in
 			// the filterTokens method above, or a new value type is added.
 			System.out.println("visitTerminal: Illegal terminal " + s);
-			return new AST.Error();
+			return new AST.ErrorExp();
 		}
 
 		public AST.Exp visitErrorNode(ErrorNode node) {
 			System.out.println("visitErrorNode: " + node.toStringTree(parser));
-			return new AST.Error();
+			return new AST.ErrorExp();
 		}
 
 		private List<AST.Exp> visitChildrenHelper(RuleNode node) {
@@ -179,5 +185,12 @@ public class Reader {
 				return true;
 			return false;
 		}
+	}
+	
+	private String readNextProgram() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.print("$ ");
+		String programText = br.readLine();
+		return programText;
 	}
 }
