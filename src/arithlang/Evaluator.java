@@ -2,50 +2,78 @@ package arithlang;
 import static arithlang.AST.*;
 import static arithlang.Value.*;
 
-public class Evaluator {
+import java.util.List;
+
+import arithlang.AST.AddExp;
+import arithlang.AST.Const;
+import arithlang.AST.DivExp;
+import arithlang.AST.ErrorExp;
+import arithlang.AST.MultExp;
+import arithlang.AST.Program;
+import arithlang.AST.SubExp;
+import arithlang.AST.VarExp;
+import arithlang.AST.Visitor;
+
+public class Evaluator implements Visitor<Value> {
+	
 	Value valueOf(Program p) {
 		// Value of a program in this language is the value of the expression
-		return valueOf(p.e());
+		return (Value) p.accept(this);
 	}
-	Value valueOf(Const exp) {
-		return new Int(exp.v());
+	
+	@Override
+	public Value visit(AddExp e) {
+		List<Exp> operands = e.all();
+		int result = 0;
+		for(Exp exp: operands) {
+			Int intermediate = (Int) exp.accept(this); // Dynamic type-checking
+			result += intermediate.v(); //Semantics of AddExp in terms of the target language.
+		}
+		return new Int(result);
 	}
-	Value valueOf(AddExp exp) {
-		Int lVal = (Int) valueOf(exp.fst()); // Dynamic type-checking
-		Int rVal = (Int) valueOf(exp.snd()); // Dynamic type-checking
-		return new Int(lVal.v() + rVal.v());
+
+	@Override
+	public Value visit(Const e) {
+		return new Int(e.v());
 	}
-	Value valueOf(SubExp exp) {
-		Int lVal = (Int) valueOf(exp.fst());
-		Int rVal = (Int) valueOf(exp.snd());
-		return new Int(lVal.v() - rVal.v());
-	}
-	Value valueOf(DivExp exp) {
-		Int lVal = (Int) valueOf(exp.fst());
-		Int rVal = (Int) valueOf(exp.snd());
+
+	@Override
+	public Value visit(DivExp e) {
+		List<Exp> operands = e.all();
+		Int lVal = (Int) operands.get(0).accept(this);
+		Int rVal = (Int) operands.get(1).accept(this);
 		return new Int(lVal.v() / rVal.v());
 	}
-	Value valueOf(MultExp exp) {
-		Int lVal = (Int) valueOf(exp.fst());
-		Int rVal = (Int) valueOf(exp.snd());
+
+	@Override
+	public Value visit(ErrorExp e) {
+		return new Value.DynamicError("Encountered an error expression");
+	}
+
+	@Override
+	public Value visit(MultExp e) {
+		List<Exp> operands = e.all();
+		Int lVal = (Int) operands.get(0).accept(this);
+		Int rVal = (Int) operands.get(1).accept(this);
 		return new Int(lVal.v() * rVal.v());
 	}
-	Value valueOf(ArithExp exp) {
-		if (exp instanceof Const)
-			return valueOf((Const) exp);
-		else if (exp instanceof AddExp)
-			return valueOf((AddExp) exp);
-		else if (exp instanceof SubExp)
-			return valueOf((SubExp) exp);
-		else if (exp instanceof DivExp)
-			return valueOf((DivExp) exp);
-		else if (exp instanceof MultExp)
-			return valueOf((MultExp) exp);
-		return new DynamicError();
+
+	@Override
+	public Value visit(Program p) {
+		return (Value) p.e().accept(this);
 	}
-	Value valueOf(Exp exp) {
-		if (exp instanceof ArithExp)
-			return valueOf((ArithExp) exp);
-		return new DynamicError();
+
+	@Override
+	public Value visit(SubExp e) {
+		List<Exp> operands = e.all();
+		Int lVal = (Int) operands.get(0).accept(this);
+		Int rVal = (Int) operands.get(1).accept(this);
+		return new Int(lVal.v() - rVal.v());
 	}
+
+	@Override
+	public Value visit(VarExp e) {
+		return new Int(42); // All variables have value 42 in this language.
+	}	
+
 }
