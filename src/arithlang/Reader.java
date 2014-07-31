@@ -20,6 +20,14 @@ import arithlang.AST.*;
 
 public class Reader {
 	
+	private static String GRAMMAR_FILE = "build/varlang/ArithLang.g";
+	//Following are ANTLR constants - Change them if you change the Grammar.
+	//Convention: New rules are always added at the end of the file. 
+	private static final String startRule = "program";
+	private static final int 
+		program = 0, exp = 1, varexp = 2, numexp = 3,
+		addexp = 4, subexp = 5, multexp = 6, divexp = 7;
+
 	private static final boolean DEBUG = false;
 	
 	Program read() throws IOException {
@@ -52,7 +60,7 @@ public class Reader {
 	private static LexerGrammar createLexicalGrammar() {
 		LexerGrammar lg = null;
 		try {
-			lg = new LexerGrammar(readFile("build/arithlang/ArithLang.g"));
+			lg = new LexerGrammar(readFile(GRAMMAR_FILE));
 		} catch (RecognitionException e) {
 			System.out.println("ErrorExp in Lexical Specification\n" + e);
 			System.exit(-1); // These are fatal errors
@@ -60,17 +68,11 @@ public class Reader {
 		return lg;
 	}
 
-
-	//Following are ANTLR constants - Change them if you change the Grammar.
-	private static final String startRule = "program";
-	private static final int program = 0, exp = 1, varexp = 2, numexp = 3,
-			addexp = 4, subexp = 5, multexp = 6, divexp = 7;
-
 	private static final Grammar g = createGrammar();
 	private static Grammar createGrammar() {
 		Grammar g = null;
 		try {
-			g = new Grammar(readFile("build/arithlang/ArithLang.g"), Reader.lg);
+			g = new Grammar(readFile(GRAMMAR_FILE), Reader.lg);
 		} catch (RecognitionException e) {
 			System.out.println("Error in Grammar Specification\n" + e);
 			System.exit(-1); // These are fatal errors
