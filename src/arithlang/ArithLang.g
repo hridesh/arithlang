@@ -33,7 +33,7 @@ grammar ArithLang;
  subexp :  
  		'(' '-' 
  		    exp 
- 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 
@@ -47,7 +47,7 @@ grammar ArithLang;
  divexp  : 
  		'(' '/' 
  		    exp 
- 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 

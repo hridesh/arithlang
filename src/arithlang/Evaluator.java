@@ -41,8 +41,12 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(DivExp e) {
 		List<Exp> operands = e.all();
 		Int lVal = (Int) operands.get(0).accept(this);
-		Int rVal = (Int) operands.get(1).accept(this);
-		return new Int(lVal.v() / rVal.v());
+		int result = lVal.v(); 
+		for(int i=1; i<operands.size(); i++) {
+			Int rVal = (Int) operands.get(i).accept(this);
+			result = result / rVal.v();
+		}
+		return new Int(result);
 	}
 
 	@Override
@@ -67,8 +71,12 @@ public class Evaluator implements Visitor<Value> {
 	public Value visit(SubExp e) {
 		List<Exp> operands = e.all();
 		Int lVal = (Int) operands.get(0).accept(this);
-		Int rVal = (Int) operands.get(1).accept(this);
-		return new Int(lVal.v() - rVal.v());
+		int result = lVal.v();
+		for(int i=1; i<operands.size(); i++) {
+			Int rVal = (Int) operands.get(i).accept(this);
+			result = result - rVal.v();
+		}
+		return new Int(result);
 	}
 
 	@Override

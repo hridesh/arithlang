@@ -20,7 +20,7 @@ import arithlang.AST.*;
 
 public class Reader {
 	
-	private static String GRAMMAR_FILE = "build/varlang/ArithLang.g";
+	private static String GRAMMAR_FILE = "build/arithlang/ArithLang.g";
 	//Following are ANTLR constants - Change them if you change the Grammar.
 	//Convention: New rules are always added at the end of the file. 
 	private static final String startRule = "program";
