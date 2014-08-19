@@ -4,17 +4,9 @@ import static arithlang.Value.*;
 
 import java.util.List;
 
-import arithlang.AST.AddExp;
-import arithlang.AST.Const;
-import arithlang.AST.DivExp;
-import arithlang.AST.ErrorExp;
-import arithlang.AST.MultExp;
-import arithlang.AST.Program;
-import arithlang.AST.SubExp;
-import arithlang.AST.VarExp;
-import arithlang.AST.Visitor;
-
 public class Evaluator implements Visitor<Value> {
+	
+	Printer.Formatter ts = new Printer.Formatter();
 	
 	Value valueOf(Program p) {
 		// Value of a program in this language is the value of the expression
@@ -57,9 +49,12 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(MultExp e) {
 		List<Exp> operands = e.all();
-		Int lVal = (Int) operands.get(0).accept(this);
-		Int rVal = (Int) operands.get(1).accept(this);
-		return new Int(lVal.v() * rVal.v());
+		int result = 1;
+		for(Exp exp: operands) {
+			Int intermediate = (Int) exp.accept(this); // Dynamic type-checking
+			result *= intermediate.v(); //Semantics of MultExp.
+		}
+		return new Int(result);
 	}
 
 	@Override

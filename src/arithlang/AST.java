@@ -12,7 +12,7 @@ import java.util.List;
  */
 @SuppressWarnings("rawtypes")
 public interface AST {
-	public static abstract class ASTNode implements AST {
+	public static abstract class ASTNode {
 		public abstract Object accept(Visitor visitor);
 	}
 	public static class Program extends ASTNode {
@@ -121,13 +121,13 @@ public interface AST {
 	
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
-		public T visit(AST.AddExp e);
 		public T visit(AST.Const e);
-		public T visit(AST.DivExp e);
-		public T visit(AST.ErrorExp e);
-		public T visit(AST.MultExp e);
-		public T visit(AST.Program p);
+		public T visit(AST.AddExp e);
 		public T visit(AST.SubExp e);
+		public T visit(AST.MultExp e);
+		public T visit(AST.DivExp e);
+		public T visit(AST.Program p);
+		public T visit(AST.ErrorExp e);
 		public T visit(AST.VarExp e);
 	}	
 }
