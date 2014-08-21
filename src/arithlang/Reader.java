@@ -100,6 +100,13 @@ public class Reader {
 		}
 		return "";
 	}
+	
+	public class ConversionException extends RuntimeException {
+		private static final long serialVersionUID = -5663970743340723405L;
+		public ConversionException(String message){
+			super(message);
+		}
+	}
 
 	/**
 	 * This data adapter takes the parse tree provided by ANTLR and converts it
@@ -125,18 +132,161 @@ public class Reader {
 
 		public AST.Exp visitChildren(RuleNode node) {			
 			switch(node.getRuleContext().getRuleIndex()){
-				case exp: return visitChildrenHelper(node).get(0); 
-				case varexp: return new AST.VarExp(node.getChild(0).getText());
-				case numexp: return visitChildrenHelper(node).get(0);
-				case addexp: return new AST.AddExp(visitChildrenHelper(node)); 
-				case subexp: return new AST.SubExp(visitChildrenHelper(node)); 
-				case multexp: return new AST.MultExp(visitChildrenHelper(node));
-				case divexp: return new AST.DivExp(visitChildrenHelper(node));
+				case varexp: return convertVarExp(node);
+				case numexp: return convertConst(node);
+				case addexp: return convertAddExp(node); 
+				case subexp: return convertSubExp(node); 
+				case multexp: return convertMultExp(node);
+				case divexp: return convertDivExp(node);
+				case exp: return visitChildrenHelper(node).get(0);
 				case program: 
 				default: 
 					System.out.println("Conversion error (from parse tree to AST): found unknown/unhandled case " + parser.getRuleNames()[node.getRuleContext().getRuleIndex()]);
 			}
 			return null;
+		}
+		
+		/**
+		 *  Syntax: Identifier
+		 */  
+		private AST.VarExp convertVarExp(RuleNode node){
+			if(node.getChildCount() > 1)
+				throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
+						"expected only Identifier, found " + node.getChildCount() +  " nodes.");
+				
+			String s = node.getChild(0).getText();
+			return new AST.VarExp(s);
+		}
+
+		/**
+		 *  Syntax: Number
+		 */  
+		private AST.Const convertConst(RuleNode node){
+			String s = node.getChild(0).toStringTree(parser);
+			try {
+				int v = Integer.parseInt(s);
+				return new AST.Const(v);
+			} catch (NumberFormatException e) {}
+			throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
+					"expected Number, found " + node.getChild(0).toStringTree(parser));
+		}
+		
+		/**
+		 *  Syntax: (+ exp* )
+		 */  
+		private AST.Exp convertAddExp(RuleNode node){
+			int index = expect(node,0,"(", "+");
+			List<AST.Exp> operands = expectOperands(node, index);
+			return new AST.AddExp(operands);
+		}
+		
+		/**
+		 *  Syntax: (- exp* )
+		 */  
+		private AST.Exp convertSubExp(RuleNode node){
+			int index = expect(node,0,"(", "-");
+			List<AST.Exp> operands = expectOperands(node, index);
+			return new AST.SubExp(operands);
+		}
+
+		/**
+		 *  Syntax: (* exp* )
+		 */  
+		private AST.Exp convertMultExp(RuleNode node){
+			int index = expect(node,0,"(", "*");
+			List<AST.Exp> operands = expectOperands(node, index);
+			return new AST.MultExp(operands);
+		}
+
+		/**
+		 *  Syntax: (/ exp* )
+		 */  
+		private AST.Exp convertDivExp(RuleNode node){
+			int index = expect(node,0,"(", "/");
+			List<AST.Exp> operands = expectOperands(node, index);
+			return new AST.DivExp(operands);
+		}
+
+		List<AST.Exp> expectOperands(RuleNode node, int startChildIndex) {
+			int index = startChildIndex; 
+			List<AST.Exp> operands = new ArrayList<AST.Exp>();	
+			while (!match(node,index,")")) {
+				AST.Exp operand = node.getChild(index++).accept(this);
+				operands.add(operand);
+			}
+			expect(node,index++, ")");
+			return operands;
+		}
+		
+		/**
+		 * Expect nth, n+1th, ..., n+mth children of node to be expressions
+		 * @param node - node to be examined.
+		 * @param n - index of first child.
+		 * @param numTokens - expected number of expressions.
+		 * @return an array of n + numTokens expressions, if expectations is met. Otherwise, throws ConversionException.
+		 */
+		protected AST.Exp[] expectExp(RuleNode node, int n, int numTokens){
+			AST.Exp results[] = new AST.Exp[numTokens];
+			for(int i = 0; i< numTokens; i++) {
+				AST.Exp value = node.getChild(n+i).accept(this);
+				if(value == null || value instanceof AST.ErrorExp)
+					throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
+							"expected Exp, found " + node.getChild(n+i).toStringTree(parser));
+				results[i] = value;
+			}
+			return results;
+		}
+
+		/**
+		 * Expect nth, n+1th, ..., n+mth children of node to be strings
+		 * @param node - node to be examined.
+		 * @param n - index of first child.
+		 * @param numTokens - expected number of strings.
+		 * @return an array of n + numTokens strings, if expectations is met. Otherwise, throws ConversionException.
+		 */
+		protected String[] expectString(RuleNode node, int n, int numTokens){
+			String results[] = new String[numTokens];
+			for(int i = 0; i< numTokens; i++, n++) {
+				String value = node.getChild(n).toString();
+				if(value == null || node.getChild(n).getChildCount()!=0)
+					throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
+							"expected Exp, found " + node.getChild(n).toStringTree(parser));
+				results[i] = value;
+			}
+			return results;
+		}
+
+		/**
+		 * Expect nth, n+1th, ... children of node to match the token 
+		 * @param node - node to be examined.
+		 * @param n - index of child.
+		 * @param tokens - expected strings.
+		 * @return n + tokens.length, if expectations is met. Otherwise, throws ConversionException.
+		 */
+		protected int expect(RuleNode node, int n, String ... tokens){
+			int numTokens = tokens.length;
+			for(int i = 0; i< numTokens; i++) {
+				if (!node.getChild(n+i).toStringTree(parser).equals(tokens[i])) 
+					throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
+							"expected " + tokens[i] + ", found " + node.getChild(n+i).toStringTree(parser));
+			}
+			return n+numTokens;
+		}
+
+		/**
+		 * Test if nth, n+1th, ... children of node match the token 
+		 * @param node - node to be examined.
+		 * @param n - index of child.
+		 * @param tokens - expected strings.
+		 * @return true, if test is met. False, otherwise.
+		 */
+		protected boolean match(RuleNode node, int n, String ... tokens){
+			int numTokens = tokens.length;
+			for(int i = 0; i< numTokens; i++) {
+				if (!node.getChild(n+i).toStringTree(parser).equals(tokens[i])) 
+					return false;
+			}
+			return true;
 		}
 
 		public AST.Exp visitTerminal(TerminalNode node) {
