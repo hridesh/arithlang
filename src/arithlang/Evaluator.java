@@ -16,29 +16,29 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(AddExp e) {
 		List<Exp> operands = e.all();
-		int result = 0;
+		double result = 0;
 		for(Exp exp: operands) {
-			Int intermediate = (Int) exp.accept(this); // Dynamic type-checking
+			NumVal intermediate = (NumVal) exp.accept(this); // Dynamic type-checking
 			result += intermediate.v(); //Semantics of AddExp in terms of the target language.
 		}
-		return new Int(result);
+		return new NumVal(result);
 	}
 
 	@Override
 	public Value visit(Const e) {
-		return new Int(e.v());
+		return new NumVal(e.v());
 	}
 
 	@Override
 	public Value visit(DivExp e) {
 		List<Exp> operands = e.all();
-		Int lVal = (Int) operands.get(0).accept(this);
-		int result = lVal.v(); 
+		NumVal lVal = (NumVal) operands.get(0).accept(this);
+		double result = lVal.v(); 
 		for(int i=1; i<operands.size(); i++) {
-			Int rVal = (Int) operands.get(i).accept(this);
+			NumVal rVal = (NumVal) operands.get(i).accept(this);
 			result = result / rVal.v();
 		}
-		return new Int(result);
+		return new NumVal(result);
 	}
 
 	@Override
@@ -49,12 +49,12 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(MultExp e) {
 		List<Exp> operands = e.all();
-		int result = 1;
+		double result = 1;
 		for(Exp exp: operands) {
-			Int intermediate = (Int) exp.accept(this); // Dynamic type-checking
+			NumVal intermediate = (NumVal) exp.accept(this); // Dynamic type-checking
 			result *= intermediate.v(); //Semantics of MultExp.
 		}
-		return new Int(result);
+		return new NumVal(result);
 	}
 
 	@Override
@@ -65,18 +65,18 @@ public class Evaluator implements Visitor<Value> {
 	@Override
 	public Value visit(SubExp e) {
 		List<Exp> operands = e.all();
-		Int lVal = (Int) operands.get(0).accept(this);
-		int result = lVal.v();
+		NumVal lVal = (NumVal) operands.get(0).accept(this);
+		double result = lVal.v();
 		for(int i=1; i<operands.size(); i++) {
-			Int rVal = (Int) operands.get(i).accept(this);
+			NumVal rVal = (NumVal) operands.get(i).accept(this);
 			result = result - rVal.v();
 		}
-		return new Int(result);
+		return new NumVal(result);
 	}
 
 	@Override
 	public Value visit(VarExp e) {
-		return new Int(42); // All variables have value 42 in this language.
+		return new NumVal(42); // All variables have value 42 in this language.
 	}	
 
 }

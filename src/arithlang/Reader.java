@@ -162,10 +162,8 @@ public class Reader {
 		 *  Syntax: Number
 		 */  
 		private AST.Const convertConst(RuleNode node){
-			String s = node.getChild(0).toStringTree(parser);
 			try {
-				int v = Integer.parseInt(s);
-				return new AST.Const(v);
+				return new AST.Const(Double.parseDouble(node.getText()));
 			} catch (NumberFormatException e) {}
 			throw new ConversionException("Conversion error: " + node.toStringTree(parser) + ", " + 
 					"expected Number, found " + node.getChild(0).toStringTree(parser));

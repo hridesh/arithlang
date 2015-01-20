@@ -51,13 +51,13 @@ public interface AST {
 	}
 
 	public static class Const extends Exp {
-		int _val;
+		double _val;
 
-		public Const(int v) {
+		public Const(double v) {
 			_val = v;
 		}
 
-		public int v() {
+		public double v() {
 			return _val;
 		}
 		

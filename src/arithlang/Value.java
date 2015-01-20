@@ -2,20 +2,24 @@ package arithlang;
 
 public interface Value {
 	public String toString();
-	static class Int implements Value {
-		private int _val;
-	    public Int(int v) { _val = v; } 
-	    public int v() { return _val; }
-	    public String toString() { return "" + _val; }
+	static class NumVal implements Value {
+		private double _val;
+	    public NumVal(double v) { _val = v; } 
+	    public double v() { return _val; }
+	    public String toString() { 
+	    	int tmp = (int) _val;
+	    	if(tmp == _val) return "" + tmp;
+	    	return "" + _val; 
+	    }
 	}
-	static class Bool implements Value {
+	static class BoolVal implements Value {
 		private boolean _val;
-	    public Bool(boolean v) { _val = v; } 
+	    public BoolVal(boolean v) { _val = v; } 
 	    public boolean v() { return _val; }
 	    public String toString() { return "" + _val; }
 	}
-	static class Unit implements Value {
-		public static final Unit v = new Unit();
+	static class UnitVal implements Value {
+		public static final UnitVal v = new UnitVal();
 	    public String toString() { return "unit"; }
 	}
 	static class DynamicError implements Value { 
