@@ -25,7 +25,7 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	@Override
-	public Value visit(Const e) {
+	public Value visit(NumExp e) {
 		return new NumVal(e.v());
 	}
 

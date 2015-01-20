@@ -13,7 +13,7 @@ public class Printer {
 			return (String) p.e().accept(this);
 		}
 		
-		public String visit(Const e) {
+		public String visit(NumExp e) {
 			return "" + e.v();
 		}
 		

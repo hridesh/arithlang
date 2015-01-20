@@ -50,10 +50,10 @@ public interface AST {
 		}
 	}
 
-	public static class Const extends Exp {
+	public static class NumExp extends Exp {
 		double _val;
 
-		public Const(double v) {
+		public NumExp(double v) {
 			_val = v;
 		}
 
@@ -121,7 +121,7 @@ public interface AST {
 	
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
-		public T visit(AST.Const e);
+		public T visit(AST.NumExp e);
 		public T visit(AST.AddExp e);
 		public T visit(AST.SubExp e);
 		public T visit(AST.MultExp e);
