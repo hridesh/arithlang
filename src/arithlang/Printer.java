@@ -45,12 +45,5 @@ public class Printer {
 			return result + ")";
 		}
 		
-		public String visit(ErrorExp e) {
-			return e.toString();
-		}
-
-		public String visit(VarExp e) {
-			return "" + e.name();
-		}
 	}
 }
