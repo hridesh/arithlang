@@ -34,22 +34,6 @@ public interface AST {
 
 	}
 
-	public static class VarExp extends Exp {
-		String _name;
-
-		public VarExp(String name) {
-			_name = name;
-		}
-
-		public String name() {
-			return _name;
-		}
-		
-		public Object accept(Visitor visitor) {
-			return visitor.visit(this);
-		}
-	}
-
 	public static class NumExp extends Exp {
 		double _val;
 
@@ -112,13 +96,7 @@ public interface AST {
 			return visitor.visit(this);
 		}
 	}
-	
-	public static class ErrorExp extends Exp {
-		public Object accept(Visitor visitor) {
-			return visitor.visit(this);
-		}
-	}
-	
+		
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
 		public T visit(AST.NumExp e);
@@ -127,7 +105,5 @@ public interface AST {
 		public T visit(AST.MultExp e);
 		public T visit(AST.DivExp e);
 		public T visit(AST.Program p);
-		public T visit(AST.ErrorExp e);
-		public T visit(AST.VarExp e);
 	}	
 }
