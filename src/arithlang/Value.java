@@ -12,20 +12,4 @@ public interface Value {
 	    	return "" + _val; 
 	    }
 	}
-	static class BoolVal implements Value {
-		private boolean _val;
-	    public BoolVal(boolean v) { _val = v; } 
-	    public boolean v() { return _val; }
-	    public String toString() { return "" + _val; }
-	}
-	static class UnitVal implements Value {
-		public static final UnitVal v = new UnitVal();
-	    public String toString() { return "unit"; }
-	}
-	static class DynamicError implements Value { 
-		private String message = "Unknown dynamic error.";
-		public DynamicError() { }
-		public DynamicError(String message) { this.message = message; }
-	    public String toString() { return "" + message; }
-	}
 }
