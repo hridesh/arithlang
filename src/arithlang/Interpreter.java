@@ -17,14 +17,18 @@ public class Interpreter {
 		Reader reader = new Reader();
 		Evaluator eval = new Evaluator();
 		Printer printer = new Printer();
-		try {
-			while (true) { // Read-Eval-Print-Loop (also known as REPL)
-				Program p = reader.read();
+		REPL: while (true) { // Read-Eval-Print-Loop (also known as REPL)
+			Program p = null;
+			try {
+				p = reader.read();
+				if(p._e == null) continue REPL;
 				Value val = eval.valueOf(p);
 				printer.print(val);
+			} catch (IOException e) {
+				System.out.println("Error reading input:" + e.getMessage());
+			} catch (NullPointerException e) {
+				System.out.println("Error:" + e.getMessage());
 			}
-		} catch (IOException e) {
-			System.out.println("Error reading input.");
 		}
 	}
 }
