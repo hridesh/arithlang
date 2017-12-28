@@ -42,11 +42,6 @@ public class Evaluator implements Visitor<Value> {
 	}
 
 	@Override
-	public Value visit(ErrorExp e) {
-		return new Value.DynamicError("Encountered an error expression");
-	}
-
-	@Override
 	public Value visit(MultExp e) {
 		List<Exp> operands = e.all();
 		double result = 1;
@@ -73,10 +68,5 @@ public class Evaluator implements Visitor<Value> {
 		}
 		return new NumVal(result);
 	}
-
-	@Override
-	public Value visit(VarExp e) {
-		return new NumVal(42); // All variables have value 42 in this language.
-	}	
 
 }
