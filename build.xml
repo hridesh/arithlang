@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<project name="lang" default="parser">
+
+	<!-- ANTLR version -->
+	<property name="antlr.version" value="4.5" />
+
+	<!-- ArithLang parser -->
+	<target name="arithlang-check-parser">
+		<condition property="arithlang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangParser.java" />
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangLexer.java" />
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangListener.java" />
+			</and>
+		</condition>
+	</target>
+
+	<target name="arithlang" depends="arithlang-check-parser" unless="arithlang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/arithlang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-package" />
+			<arg value="arithlang.parser; import static arithlang.AST.*" />
+			<arg value="ArithLang.g" />
+		</java>
+	</target>
+
+	<target name="parser" depends="arithlang" >
+	</target>
+	
+</project>
