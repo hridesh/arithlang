@@ -2,6 +2,7 @@ package arithlang;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import org.antlr.v4.runtime.*;
@@ -37,7 +38,7 @@ public class Reader {
 		return runFile(programText);
 	}
 
-	protected String getProgramDirectory() { return "build/arithlang/examples/"; }
+	protected String getProgramDirectory() { return "build"+File.separator+"arithlang"+File.separator+"examples"+File.separator; }
 	protected String runFile(String programText) throws IOException {
 		if(programText.startsWith("run ")){
 			programText = readFile(getProgramDirectory() + programText.substring(4));
