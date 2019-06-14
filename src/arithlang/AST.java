@@ -10,7 +10,6 @@ import java.util.List;
  * @author hridesh
  * 
  */
-//@SuppressWarnings("rawtypes")
 public interface AST {
 	public static abstract class ASTNode {
 		public abstract <T> T accept(Visitor<T> visitor);
