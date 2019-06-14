@@ -10,10 +10,10 @@ import java.util.List;
  * @author hridesh
  * 
  */
-@SuppressWarnings("rawtypes")
+//@SuppressWarnings("rawtypes")
 public interface AST {
 	public static abstract class ASTNode {
-		public abstract Object accept(Visitor visitor);
+		public abstract <T> T accept(Visitor<T> visitor);
 	}
 	public static class Program extends ASTNode {
 		Exp _e;
@@ -26,7 +26,7 @@ public interface AST {
 			return _e;
 		}
 		
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
@@ -45,7 +45,7 @@ public interface AST {
 			return _val;
 		}
 		
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
@@ -65,7 +65,7 @@ public interface AST {
 		public AddExp(List<Exp> args) {
 			super(args);
 		}
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
@@ -74,7 +74,7 @@ public interface AST {
 		public SubExp(List<Exp> args) {
 			super(args);
 		}
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
@@ -83,7 +83,7 @@ public interface AST {
 		public DivExp(List<Exp> args) {
 			super(args);
 		}
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
@@ -92,7 +92,7 @@ public interface AST {
 		public MultExp(List<Exp> args) {
 			super(args);
 		}
-		public Object accept(Visitor visitor) {
+		public <T> T accept(Visitor<T> visitor) {
 			return visitor.visit(this);
 		}
 	}
