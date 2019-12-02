@@ -28,5 +28,32 @@
 
 	<target name="parser" depends="arithlang" >
 	</target>
+
+    	<target name="compile" depends="parser">
+        	<mkdir dir="build/classes"/>
+        	<javac srcdir="src" destdir="build/classes">
+    			<classpath>
+        			<pathelement path="lib/antlr-4.5-complete.jar"/>
+    			</classpath>
+		</javac>
+    	</target>
+
+    	<target name="jar">
+        	<mkdir dir="build/jar"/>
+        	<jar destfile="build/jar/ArithLang.jar" basedir="build/classes">
+    			<zipgroupfileset dir="lib" includes="antlr-4.5-complete.jar" />
+            		<manifest>
+                		<attribute name="Main-Class" value="arithlang.Interpreter"/>
+            		</manifest>
+        	</jar>
+    	</target>
+
+    	<target name="run">
+        	<java jar="build/jar/ArithLang.jar" fork="true"/>
+    	</target>
+
+        <target name="clean">
+                <delete dir="build"/>
+        </target>
 	
 </project>
