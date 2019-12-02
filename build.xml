@@ -38,7 +38,7 @@
 		</javac>
     	</target>
 
-    	<target name="jar">
+    	<target name="jar" depends="compile">
         	<mkdir dir="build/jar"/>
         	<jar destfile="build/jar/ArithLang.jar" basedir="build/classes">
     			<zipgroupfileset dir="lib" includes="antlr-4.5-complete.jar" />
@@ -48,7 +48,7 @@
         	</jar>
     	</target>
 
-    	<target name="run">
+    	<target name="run" depends="jar">
         	<java jar="build/jar/ArithLang.jar" fork="true"/>
     	</target>
 
