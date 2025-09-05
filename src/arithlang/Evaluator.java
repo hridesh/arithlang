@@ -5,6 +5,8 @@ import static arithlang.Value.*;
 import java.util.List;
 import java.lang.Math;
 
+import arithlang.DynamicError;
+
 public class Evaluator implements Visitor<Value> {
 	
 	Printer.Formatter ts = new Printer.Formatter();
@@ -32,11 +34,28 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(DivExp e) {
+		// TODO add check for division by zero
+		/* test cases
+		 * (/ 2 0) [x]
+		 * Divide by zero error at: (/ 2 0)
+		 * 
+		 * (- 279 (/ 2 0)) [x]
+		 * Divide by zero error at: (/ 2 0)
+		 * 
+		 * (+ (* 3 100) (/ 84(- 279 (/ 2 0)))) [x]
+		 * Divide by zero error at: (/ 2 0)
+		 * 
+		 */
 		List<Exp> operands = e.all();
 		NumVal lVal = (NumVal) operands.get(0).accept(this);
 		double result = lVal.v(); 
 		for(int i=1; i<operands.size(); i++) {
 			NumVal rVal = (NumVal) operands.get(i).accept(this);
+			
+			if(rVal.v() == 0) { // check for division by zero
+				throw new DynamicError("Divide by zero error at: " + "(/ " + result + " " + rVal.v() + ")");
+			}
+
 			result = result / rVal.v();
 		}
 		return new NumVal(result);
@@ -49,7 +68,7 @@ public class Evaluator implements Visitor<Value> {
 		 //    (** 3 4)
 		 //    [java] $ 64 // [x]
 		 //    (** 3 2 4)
-		 //    [java] $ 65536 // [ ]
+		 //    [java] $ 65536 // [x]
 		 //    (** 8 0)
 		 //    [java] $ 0   // [x]
 		//     expected: 81, 6561, 1		 

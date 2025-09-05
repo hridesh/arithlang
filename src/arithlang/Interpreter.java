@@ -29,6 +29,9 @@ public class Interpreter {
 			} catch (NullPointerException e) {
 				System.out.println("Error:" + e.getMessage());
 			}
+			catch (DynamicError e) { // added dynamic error so program don't crash
+				System.out.println(e.getMessage());
+			}
 		}
 	}
 }
