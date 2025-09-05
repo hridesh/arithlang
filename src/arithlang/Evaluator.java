@@ -58,10 +58,11 @@ public class Evaluator implements Visitor<Value> {
 		 */
 
 		List<Exp> operands = e.all();
-		NumVal lVal = (NumVal) operands.get(0).accept(this);
-		double result = lVal.v(); 
+		NumVal lVal = (NumVal) operands.get(0).accept(this); // get left most value
+		double result = lVal.v(); // init result as left most value
 		for(int i=1; i<operands.size(); i++) {
 			NumVal rVal = (NumVal) operands.get(i).accept(this);
+			// value i+1 to the right of result to compute next
 			result = Math.pow(result, rVal.v());
 		}
 		return new NumVal(result);
