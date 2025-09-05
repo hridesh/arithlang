@@ -86,6 +86,15 @@ public interface AST {
 			return visitor.visit(this);
 		}
 	}
+	// added exponential exp
+	public static class ExpExp extends CompoundArithExp {
+		public ExpExp(List<Exp> args) {
+			super(args);
+		}
+		public <T> T accept(Visitor<T> visitor) {
+			return visitor.visit(this);
+		}
+	}
 
 	public static class MultExp extends CompoundArithExp {
 		public MultExp(List<Exp> args) {
@@ -103,6 +112,7 @@ public interface AST {
 		public T visit(AST.SubExp e);
 		public T visit(AST.MultExp e);
 		public T visit(AST.DivExp e);
+		public T visit(AST.ExpExp p); //added exponential exp
 		public T visit(AST.Program p);
 	}	
 }

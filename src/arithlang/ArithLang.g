@@ -43,6 +43,7 @@ grammar ArithLang;
         | s=subexp { $ast = $s.ast; }
         | m=multexp { $ast = $m.ast; }
         | d=divexp { $ast = $d.ast; }
+        | e=expexp { $ast = $e.ast; }
         ;
  
  // The actions { $ast = $n.ast; } means that this rule passed through 
@@ -122,6 +123,14 @@ grammar ArithLang;
  		    e=exp { $list.add($e.ast); } 
  		    ( e=exp { $list.add($e.ast); } )+ 
  		')' { $ast = new DivExp($list); }
+ 		;
+ expexp returns [ExpExp ast] 
+        locals [ArrayList<Exp> list]
+ 		@init { $list = new ArrayList<Exp>(); } :
+ 		'(' '**'
+ 		    e=exp { $list.add($e.ast); } 
+ 		    ( e=exp { $list.add($e.ast); } )+ 
+ 		')' { $ast = new ExpExp($list); }
  		;
 
 

@@ -3,6 +3,7 @@ import static arithlang.AST.*;
 import static arithlang.Value.*;
 
 import java.util.List;
+import java.lang.Math;
 
 public class Evaluator implements Visitor<Value> {
 	
@@ -40,7 +41,18 @@ public class Evaluator implements Visitor<Value> {
 		}
 		return new NumVal(result);
 	}
-
+	// added exponential exp
+	@Override
+	public Value visit(ExpExp e) {
+		// TODO verify this will work
+		List<Exp> operands = e.all();
+		double result = 1;
+		for(Exp exp: operands) {
+			NumVal intermediate = (NumVal) exp.accept(this); // Dynamic type-checking
+			result = Math.pow(intermediate.v(), result); //Semantics of ExpExp.
+		}
+		return new NumVal(result);
+	}
 	@Override
 	public Value visit(MultExp e) {
 		List<Exp> operands = e.all();

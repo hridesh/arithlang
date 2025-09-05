@@ -30,6 +30,13 @@ public class Printer {
 				result += " " + exp.accept(this);
 			return result + ")";
 		}
+		// added exponential exp
+		public String visit(ExpExp e) {
+			String result = "(**";
+			for(AST.Exp exp : e.all()) 
+				result += " " + exp.accept(this);
+			return result + ")";
+		}
 		
 		public String visit(MultExp e) {
 			String result = "(*";
