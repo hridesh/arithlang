@@ -2,7 +2,7 @@
 <project name="lang" default="parser">
 
 	<!-- ANTLR version -->
-	<property name="antlr.version" value="4.5" />
+	<property name="antlr.version" value="4.13.2" />
 
 	<!-- ArithLang parser -->
 	<target name="arithlang-check-parser">
@@ -33,7 +33,7 @@
         	<mkdir dir="build/classes"/>
         	<javac srcdir="src" destdir="build/classes">
     			<classpath>
-        			<pathelement path="lib/antlr-4.5-complete.jar"/>
+        			<pathelement path="lib/antlr-4.13.2-complete.jar"/>
     			</classpath>
 		</javac>
     	</target>
@@ -41,7 +41,7 @@
     	<target name="jar" depends="compile">
         	<mkdir dir="build/jar"/>
         	<jar destfile="build/jar/ArithLang.jar" basedir="build/classes">
-    			<zipgroupfileset dir="lib" includes="antlr-4.5-complete.jar" />
+    			<zipgroupfileset dir="lib" includes="antlr-4.13.2-complete.jar" />
             		<manifest>
                 		<attribute name="Main-Class" value="arithlang.Interpreter"/>
             		</manifest>
