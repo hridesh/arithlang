@@ -1,0 +1,93 @@
+// ---------------------------------------------------------------------------
+// Gradle build for the *Lang pedagogical interpreters
+// "An Experiential Introduction to Principles of Programming Languages"
+// ---------------------------------------------------------------------------
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+// Per-language settings -- the ONLY lines that differ between repositories:
+ext.langPkg       = 'arithlang'                 // source package & runtime dir
+ext.grammarFile   = 'ArithLang.g'               // grammar in src/<langPkg>/
+ext.mainClassName = 'arithlang.Interpreter'     // entry point
+ext.usePackageArg = true                        // false for speclang & typelang
+                                                // (their grammar carries an @header)
+
+ext.antlrVersion = '4.13.2'
+ext.antlrJar     = file("lib/antlr-${antlrVersion}-complete.jar")
+
+// Build with whatever JDK the user has installed (Gradle 9 itself requires
+// Java 17+). Bytecode targets 17 so the interpreters run on a wide range of
+// Java versions -- a student on JDK 17, 21, or 26 can all build and run this.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+dependencies {
+    // The ANTLR tool + runtime are bundled in lib/antlr-4.13.2-complete.jar.
+    implementation files(antlrJar)
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ['src'] }   // includes the generated parser sources
+        resources { srcDirs = [] }   // resources handled by copyRuntimeResources
+    }
+}
+
+// 1) Generate the ANTLR parser, replicating the original Ant invocation exactly.
+tasks.register('generateParser', JavaExec) {
+    group = 'build'
+    description = "Generate the ANTLR parser for ${langPkg}"
+    onlyIf { file("src/${langPkg}/${grammarFile}").exists() }
+    def langDir = file("src/${langPkg}")
+    inputs.file("src/${langPkg}/${grammarFile}")
+    outputs.dir("src/${langPkg}/parser")
+    classpath = files(antlrJar)
+    mainClass = 'org.antlr.v4.Tool'
+    workingDir = langDir
+    doFirst {
+        mkdir "src/${langPkg}/parser"
+        def a = ['-o', 'parser/', '-no-listener']
+        if (usePackageArg) {
+            a += ['-package', "${langPkg}.parser; import static ${langPkg}.AST.*"]
+        }
+        a += [grammarFile]
+        args = a
+    }
+}
+
+compileJava {
+    dependsOn generateParser
+}
+
+// 2) Reproduce Eclipse's output layout: copy every non-Java file under src/
+//    into build/, preserving structure -> build/<lang>/examples, .../lib, etc.
+tasks.register('copyRuntimeResources', Copy) {
+    dependsOn generateParser   // generateParser writes into src/<lang>/parser
+    from('src') { exclude '**/*.java' }
+    into "${projectDir}/build"
+}
+tasks.named('classes') { dependsOn 'copyRuntimeResources' }
+
+application {
+    mainClass = project.mainClassName
+}
+
+// 3) Run from the project root (so build/<lang>/examples resolves) with stdin
+//    connected for the interactive REPL.
+tasks.named('run', JavaExec) {
+    dependsOn 'classes'
+    workingDir = projectDir
+    standardInput = System.in
+}
+
+// Convenience fat-jar, equivalent to the old Ant 'jar' target.
+tasks.named('jar', Jar) {
+    manifest { attributes 'Main-Class': project.mainClassName }
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
