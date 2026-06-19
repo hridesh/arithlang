@@ -50,6 +50,15 @@ copied to `build/<lang>/examples/` by the build.
 
 # Using an IDE
 
-The Eclipse project files (`.classpath`, `.project`, `.settings/`) are included.
-Any modern IDE (Eclipse, IntelliJ IDEA, VS Code) can also import the project
-directly as a Gradle project.
+The simplest path is to import this as a **Gradle** project, which configures the
+Java version, the ANTLR dependency, and the generated parser automatically -- no
+manual build-path or compiler settings needed:
+
+- **Eclipse:** File -> Import -> Gradle -> Existing Gradle Project, then select
+  this folder. (Import it *as a Gradle project*, rather than creating a new Java
+  project and importing the source via the File System.)
+- **IntelliJ IDEA / VS Code:** open the folder; it is detected as a Gradle project.
+
+The Eclipse project files (`.classpath`, `.project`, `.settings/`) are also
+included for a plain Java-project import; they set the compiler to Java 17 to
+match the build.
